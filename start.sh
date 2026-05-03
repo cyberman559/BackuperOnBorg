@@ -68,6 +68,10 @@ if time_to_backup || [[ "$force" == "force" ]]; then
     YAML_CONTENT=$(base64 -w0 "$YAML")
     
     if [ "$VPN" == 1 ]; then
+      
+      echo "Запуск впн"
+      echo "/root/.borg/projects/${project}/$OVPN_NAME.ovpn"
+      
         openvpn --config /root/.borg/projects/${project}/$OVPN_NAME.ovpn --daemon \
           --log "/var/log/openvpn-${project}.log" \
           --writepid "/tmp/openvpn-${project}.pid"
@@ -75,8 +79,11 @@ if time_to_backup || [[ "$force" == "force" ]]; then
           sleep 10
           
           if ! ping -c1 -W3 "$IP" >/dev/null 2>&1; then
-            pkill -F "/tmp/openvpn-${project}.pid" 2>/dev/null || true
-            exit 1
+              echo "нет поделючения"
+              pkill -F "/tmp/openvpn-${project}.pid" 2>/dev/null || true
+              exit 1
+          else  
+              echo "подключен впн"
           fi
     fi
     
