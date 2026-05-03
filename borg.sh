@@ -5,7 +5,8 @@ PRIVATE_KEY_CONTENT="$2"
 YAML="$3"
 DB_TYPE="$4"
 DB_PATH="$5"
-shift 5
+SUDO_USER="$6"
+shift 6
 
 DB_NAME=("$@")
 
@@ -17,6 +18,14 @@ yaml_file="/tmp/$RANDOM_STRING$SALT.yaml"
 function close() {
     rm -f "$identity_file"
     rm -f "$yaml_file"
+}
+
+run_as_user() {
+  if [[ -n "${SUDO_USER:-}" && "$SUDO_USER" != "root" ]]; then
+    sudo -u "$SUDO_USER" "$@"
+  else
+    "$@"
+  fi
 }
 
 trap close EXIT
@@ -95,7 +104,7 @@ for db in "${DB_NAME[@]}"; do
       fi
     done
 
-    pg_dump "$db" "${EXCLUDE_ARGS[@]}" > "$DB_PATH/$db.sql" || {
+    run_as_user pg_dump "$db" "${EXCLUDE_ARGS[@]}" > "$DB_PATH/$db.sql" || {
       echo "Ошибка дампа PostgreSQL: $db"
       exit 1
     }

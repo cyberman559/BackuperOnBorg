@@ -25,6 +25,8 @@ set -e
 
 source /root/.borg/projects/${project}/settings.conf
 : "${DB_TYPE:=mysql}"
+: "${DB_PATH:=~}"
+: "${SUDO_USER:=root}"
 
 mkdir -p /var/borg/projects/${project}/
 
@@ -90,7 +92,7 @@ if time_to_backup || [[ "$force" == "force" ]]; then
     if ping -c1 -W3 "$IP" >/dev/null 2>&1; then
       ssh -p "$PORT" -i /root/.ssh/id_ed25519 \
         "$USER@$IP" \
-        BORG_PASSPHRASE="$BORG_PASSPHRASE" bash -s -- "$project" "$PRIVATE_KEY_CONTENT" "$YAML_CONTENT" "$DB_TYPE" "$DB_PATH" "${DB_NAME[@]}" < /root/.borg/borg.sh
+        BORG_PASSPHRASE="$BORG_PASSPHRASE" bash -s -- "$project" "$PRIVATE_KEY_CONTENT" "$YAML_CONTENT" "$DB_TYPE" "$DB_PATH" "$SUDO_USER" "${DB_NAME[@]}" < /root/.borg/borg.sh
       date +%F > "$FLAG_FILE"
     fi
 fi
