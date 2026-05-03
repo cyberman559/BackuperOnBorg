@@ -8,6 +8,7 @@ BORG_PASSPHRASE=""
 
 DB_TYPE="mysql,psql,mssql" #выбрать один
 DB_NAME=("sitemanager")
+DB_PATH="/var/www/html/{{project}}/database/"
 
 VPN=0
 OVPN_NAME=""

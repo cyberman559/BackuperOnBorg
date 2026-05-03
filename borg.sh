@@ -4,7 +4,8 @@ project="$1"
 PRIVATE_KEY_CONTENT="$2"
 YAML="$3"
 DB_TYPE="$4"
-shift 4
+DB_PATH="$5"
+shift 5
 
 DB_NAME=("$@")
 
@@ -63,6 +64,7 @@ done
 ;;
 
 psql|postgres|postgresql)
+
 for db in "${DB_NAME[@]}"; do
     echo "Dump PostgreSQL: $db"
 
@@ -93,7 +95,7 @@ for db in "${DB_NAME[@]}"; do
       fi
     done
 
-    pg_dump "$db" "${EXCLUDE_ARGS[@]}" > "$DUMP_DIR/$db.sql" || {
+    pg_dump "$db" "${EXCLUDE_ARGS[@]}" > "$DB_PATH/$db.sql" || {
       echo "Ошибка дампа PostgreSQL: $db"
       exit 1
     }
