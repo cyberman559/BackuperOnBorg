@@ -2,8 +2,11 @@ IP="127.0.0.1" #IP клиента, с которого снимаем копию
 USER="root" #пользователь SSH клиента, с которого снимаем копию
 PORT=22 #порт SSH клиента, с которого снимаем копию
 
+PROJECT_TYPE="" #пока не используем
 PROJECT=""
 BORG_PASSPHRASE=""
+
+DB_TYPE="mysql,psql,mssql" #выбрать один
 DB_NAME=("sitemanager")
 
 VPN=0

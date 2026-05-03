@@ -1,0 +1,43 @@
+source_directories:
+  - /var/www/html/{{PROJECT}}
+exclude_patterns:
+  - /var/www/html/{{PROJECT}}/vendor
+  - /var/www/html/{{PROJECT}}/node_modules
+  - /var/www/html/{{PROJECT}}/storage/logs/*.log
+  - /var/www/html/{{PROJECT}}/storage/framework/cache/*
+  - /var/www/html/{{PROJECT}}/storage/framework/sessions/*
+  - /var/www/html/{{PROJECT}}/storage/framework/views/*
+  - /var/www/html/{{PROJECT}}/storage/app/public/uploads/*.tmp
+repositories:
+  - label: {{PROJECT}}
+    path: ssh://{{PROJECT}}@{{SERVER_IP}}:{{SERVER_PORT}}/mnt/backups/{{PROJECT}}
+one_file_system: false
+
+encryption_passcommand: "echo ${BORG_PASSPHRASE}"
+
+atime: false
+ctime: true
+birthtime: true
+
+checkpoint_interval: 1800
+chunker_params: 19,23,21,4095
+retries: 0
+retry_wait: 0
+lock_wait: 3600
+umask: 077
+
+compression: lz4
+archive_name_format: "{{PROJECT}}-{now:%Y-%m-%d_%H-%M-%S}"
+
+keep_daily: 7
+keep_weekly: 4
+keep_monthly: 6
+
+#after_backup:
+#  - date +%F > /var/borg/projects/backups/{{PROJECT}}/.full_last_success
+#after_prune:
+#  - borg compact {{PROJECT}}
+on_error:
+  - echo "Ошибка во время резервного копирования" >&2
+
+files_cache: ctime,size

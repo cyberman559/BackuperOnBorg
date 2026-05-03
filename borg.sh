@@ -3,7 +3,8 @@
 project="$1"
 PRIVATE_KEY_CONTENT="$2"
 YAML="$3"
-shift 3
+DB_TYPE="$4"
+shift 4
 
 DB_NAME=("$@")
 
@@ -23,6 +24,10 @@ dump_base_skip_stat=1
 dump_base_skip_search=1
 dump_base_skip_log=1
 
+
+case "$DB_TYPE" in
+
+mysql)
 for db in "${DB_NAME[@]}"; do
     all_tables=($(mysql -N -e "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA='$db';"))
 
@@ -55,6 +60,56 @@ for db in "${DB_NAME[@]}"; do
         echo "Ошибка создания дампа базы данных."
     fi
 done
+;;
+
+psql|postgres|postgresql)
+for db in "${DB_NAME[@]}"; do
+    echo "Dump PostgreSQL: $db"
+
+    mapfile -t all_tables < <(
+      psql -d "$db" -At -c "SELECT tablename FROM pg_tables WHERE schemaname='public';"
+    )
+
+    EXCLUDE_ARGS=()
+
+    for table in "${all_tables[@]}"; do
+      table_lower=$(echo "$table" | tr '[:upper:]' '[:lower:]')
+
+      if [[ ${dump_base_skip_stat:-0} -eq 1 && "$table_lower" =~ ^b_stat ]]; then
+        EXCLUDE_ARGS+=(--exclude-table="$table")
+        continue
+      fi
+
+      if [[ ${dump_base_skip_search:-0} -eq 1 && "$table_lower" =~ ^b_search_ ]]; then
+        if [[ ! "$table_lower" =~ ^b_search_custom_rank$ && ! "$table_lower" =~ ^b_search_phrase$ ]]; then
+          EXCLUDE_ARGS+=(--exclude-table="$table")
+          continue
+        fi
+      fi
+
+      if [[ ${dump_base_skip_log:-0} -eq 1 && "$table_lower" == "b_event_log" ]]; then
+        EXCLUDE_ARGS+=(--exclude-table="$table")
+        continue
+      fi
+    done
+
+    pg_dump "$db" "${EXCLUDE_ARGS[@]}" > "$DUMP_DIR/$db.sql" || {
+      echo "Ошибка дампа PostgreSQL: $db"
+      exit 1
+    }
+  done
+;;
+
+mssql|sqlserver)
+  echo "Данный тип БД временно не доступен."
+;;
+
+*)
+  echo "Неизвестный DB_TYPE: $DB_TYPE"
+  echo "Дамп базы данных не создан."
+;;
+
+esac
 
 echo "$PRIVATE_KEY_CONTENT" | base64 -d > "$identity_file"
 chmod 600 "$identity_file"

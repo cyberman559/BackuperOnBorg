@@ -49,11 +49,23 @@ fi
 
 mkdir /root/.borg/projects/$username
 
-sed "s/{{PROJECT}}/$(printf %q "$username")/g" /root/.borg/full.yaml.example > /root/.borg/projects/$username/full.yaml
+echo "Выберите тип проекта:"
+echo "1 - битрикс"
+echo "2 - laravel"
+echo "3 - 1с"
+read -p "Введите номер: " project_type
+case $project_type in
+  1) yaml_name="bitrix" ;;
+  2) yaml_name="lara" ;;
+  #3) yaml_name="1c" ;;
+  *) echo "Неверный выбор"; exit 1 ;;
+esac
+
+sed "s/{{PROJECT}}/$(printf %q "$username")/g" /root/.borg/$yaml_name.yaml.example > /root/.borg/projects/$username/full.yaml
 if [[ ! -f /root/.borg/projects/$username/settings.conf ]]; then
   cp /root/.borg/settings.conf.example /root/.borg/projects/$username/settings.conf
 fi
 
-echo "Не забудь исправить /root/.borg/projects/$username/full.yaml и /root/.borg/projects/$username/$username.conf"
+echo "Не забудь исправить /root/.borg/projects/$username/$yaml_name.yaml и /root/.borg/projects/$username/$username.conf"
 
 echo "Завершено!"
