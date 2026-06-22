@@ -6,7 +6,8 @@ YAML="$3"
 DB_TYPE="$4"
 DB_PATH="$5"
 SUDO_USER="$6"
-shift 6
+DB_USER="$7"
+shift 7
 
 DB_NAME=("$@")
 
@@ -104,7 +105,7 @@ for db in "${DB_NAME[@]}"; do
       fi
     done
 
-    run_as_user pg_dump service="$db" "$db" "${EXCLUDE_ARGS[@]}" > "$DB_PATH/$db.sql" || {
+    run_as_user pg_dump --dbname="service=$db" "${EXCLUDE_ARGS[@]}" > "$DB_PATH/$db.sql" || {
       echo "Ошибка дампа PostgreSQL: $db"
       exit 1
     }

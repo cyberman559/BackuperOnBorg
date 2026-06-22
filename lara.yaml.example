@@ -3,11 +3,6 @@ source_directories:
 exclude_patterns:
   - /var/www/html/{{PROJECT}}/vendor
   - /var/www/html/{{PROJECT}}/node_modules
-  - /var/www/html/{{PROJECT}}/storage/logs/*.log
-  - /var/www/html/{{PROJECT}}/storage/framework/cache/*
-  - /var/www/html/{{PROJECT}}/storage/framework/sessions/*
-  - /var/www/html/{{PROJECT}}/storage/framework/views/*
-  - /var/www/html/{{PROJECT}}/storage/app/public/uploads/*.tmp
 repositories:
   - label: {{PROJECT}}
     path: ssh://{{PROJECT}}@{{SERVER_IP}}:{{SERVER_PORT}}/mnt/backups/{{PROJECT}}
