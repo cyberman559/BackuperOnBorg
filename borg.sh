@@ -78,34 +78,34 @@ psql|postgres|postgresql)
 for db in "${DB_NAME[@]}"; do
     echo "Dump PostgreSQL: $db"
 
-    mapfile -t all_tables < <(
-      psql -d "$db" -At -c "SELECT tablename FROM pg_tables WHERE schemaname='public';"
-    )
+#    mapfile -t all_tables < <(
+#      run_as_user psql -h 127.0.0.1 -U "$DB_USER" -d "$db" -At -c "SELECT tablename FROM pg_tables WHERE schemaname='public';"
+#    )
+#
+#    EXCLUDE_ARGS=()
+#
+#    for table in "${all_tables[@]}"; do
+#      table_lower=$(echo "$table" | tr '[:upper:]' '[:lower:]')
+#
+#      if [[ ${dump_base_skip_stat:-0} -eq 1 && "$table_lower" =~ ^b_stat ]]; then
+#        EXCLUDE_ARGS+=(--exclude-table="$table")
+#        continue
+#      fi
+#
+#      if [[ ${dump_base_skip_search:-0} -eq 1 && "$table_lower" =~ ^b_search_ ]]; then
+#        if [[ ! "$table_lower" =~ ^b_search_custom_rank$ && ! "$table_lower" =~ ^b_search_phrase$ ]]; then
+#          EXCLUDE_ARGS+=(--exclude-table="$table")
+#          continue
+#        fi
+#      fi
+#
+#      if [[ ${dump_base_skip_log:-0} -eq 1 && "$table_lower" == "b_event_log" ]]; then
+#        EXCLUDE_ARGS+=(--exclude-table="$table")
+#        continue
+#      fi
+#    done
 
-    EXCLUDE_ARGS=()
-
-    for table in "${all_tables[@]}"; do
-      table_lower=$(echo "$table" | tr '[:upper:]' '[:lower:]')
-
-      if [[ ${dump_base_skip_stat:-0} -eq 1 && "$table_lower" =~ ^b_stat ]]; then
-        EXCLUDE_ARGS+=(--exclude-table="$table")
-        continue
-      fi
-
-      if [[ ${dump_base_skip_search:-0} -eq 1 && "$table_lower" =~ ^b_search_ ]]; then
-        if [[ ! "$table_lower" =~ ^b_search_custom_rank$ && ! "$table_lower" =~ ^b_search_phrase$ ]]; then
-          EXCLUDE_ARGS+=(--exclude-table="$table")
-          continue
-        fi
-      fi
-
-      if [[ ${dump_base_skip_log:-0} -eq 1 && "$table_lower" == "b_event_log" ]]; then
-        EXCLUDE_ARGS+=(--exclude-table="$table")
-        continue
-      fi
-    done
-
-    run_as_user pg_dump --dbname="service=$db" "${EXCLUDE_ARGS[@]}" > "$DB_PATH/$db.sql" || {
+    run_as_user pg_dump -h 127.0.0.1 -U "$DB_USER" "${EXCLUDE_ARGS[@]}" > "$DB_PATH/$db.sql" || {
       echo "Ошибка дампа PostgreSQL: $db"
       exit 1
     }
