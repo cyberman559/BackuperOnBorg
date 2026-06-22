@@ -105,7 +105,7 @@ for db in "${DB_NAME[@]}"; do
 #      fi
 #    done
 
-    run_as_user pg_dump -h 127.0.0.1 -U "$DB_USER" "${EXCLUDE_ARGS[@]}" > "$DB_PATH/$db.sql" || {
+    run_as_user pg_dump -h 127.0.0.1 -U "$DB_USER" "$db" > "$DB_PATH/$db.sql" || {
       echo "Ошибка дампа PostgreSQL: $db"
       exit 1
     }
