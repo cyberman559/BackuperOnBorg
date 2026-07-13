@@ -57,7 +57,7 @@ read -p "Введите номер: " project_type
 case $project_type in
   1) yaml_name="bitrix" ;;
   2) yaml_name="lara" ;;
-  #3) yaml_name="1c" ;;
+  3) yaml_name="1c" ;;
   *) echo "Неверный выбор"; exit 1 ;;
 esac
 
