@@ -39,14 +39,14 @@ fi
 
 function time_to_backup() {
     if [[ ! -f "$FLAG_FILE" ]]; then
-        return 0
+      return 0
     fi
 
     last_date=$(<"$FLAG_FILE")
     last_ts=$(date -d "$last_date" +%s)
     next_ts=$(date -d "$last_date +1 days" +%s)
     today_ts=$(date -d "$(date +%F)" +%s)
-
+    
     if [ "$today_ts" -ge "$next_ts" ]; then
         current_time=$(date +%H%M)
         current_time=$((10#$current_time))
@@ -71,6 +71,10 @@ start_vpn() {
     openvpn --config "/root/.borg/projects/${project}/${ovpn_name}.ovpn" --daemon \
         --log "/var/log/openvpn-${project}.log" \
         --writepid "/tmp/openvpn-${project}.pid"
+
+    if ping -c1 -W3 "$ip" >/dev/null 2>&1; then
+        echo "Проверяю соединение"
+    fi
 
     sleep 10
 
@@ -111,9 +115,9 @@ if time_to_backup || [[ "$force" == "force" ]]; then
     if ping -c1 -W3 "$IP" >/dev/null 2>&1; then
       if [ "$PROJECT_TYPE" = "1c" ]; then
           ssh -p "$PORT" -i /root/.ssh/id_ed25519 \
-              "$USER@$IP" \
-              "BORG_PASSPHRASE='$BORG_PASSPHRASE' wsl bash -s -- \"$project\" \"$PRIVATE_KEY_CONTENT\" \"$YAML_CONTENT\" \"$DB_TYPE\" \"$DB_PATH\" \"$SUDO_USER\" \"$DB_USER\" \"${DB_NAME[@]}\"" \
-              < /root/.borg/borg.sh
+            "$USER@$IP" \
+            "wsl bash -c 'BORG_PASSPHRASE=\"$BORG_PASSPHRASE\" bash -s -- \"$project\" \"$PRIVATE_KEY_CONTENT\" \"$YAML_CONTENT\" \"$DB_TYPE\" \"$DB_PATH\" \"$SUDO_USER\" \"$DB_USER\" \"${DB_NAME[@]}\"'" \
+            < /root/.borg/borg.sh
       else
           ssh -p "$PORT" -i /root/.ssh/id_ed25519 \
               "$USER@$IP" \

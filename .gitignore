@@ -4,3 +4,4 @@ projects
 old
 old_test
 /.idea/
+/cron.sh
